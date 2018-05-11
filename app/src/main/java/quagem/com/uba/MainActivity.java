@@ -48,20 +48,25 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        if (savedInstanceState != null) {
+        // First check if there is an instant saved and contains json data.
+        // Else, if there is a connection try to get network data.
+        // Finally display error message if every other possibility fails.
 
-            if (savedInstanceState.containsKey(JSON_EXTRA))
-                mJsonData = savedInstanceState.getString(JSON_EXTRA);
-            else Toast.makeText(this, R.string.error_loading_data, Toast.LENGTH_LONG).show();
+        // This will work even if devise is rotated while loading data and
+        // only access network once by passing the json data to persistent fragments
+        // so they can parse data as needed by their views.
 
-        } else {
+        if (savedInstanceState != null && savedInstanceState.containsKey(JSON_EXTRA)) {
+            // Save json data from saved instant state.
+            mJsonData = savedInstanceState.getString(JSON_EXTRA);
+            progressBar.setVisibility(View.GONE);
 
-            if (isConnected()) {
-                // This will load json from network and load RecipeListFragment only once.
-                getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-
-            } else Toast.makeText(this, R.string.connection_error, Toast.LENGTH_LONG).show();
+        } else if (isConnected()) {
+            // When loader finishes, the RecipeListFragment is inflated.
+            // This will only happen once.
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
         }
+        else Toast.makeText(this, R.string.connection_error, Toast.LENGTH_LONG).show();
     }
 
     @Override

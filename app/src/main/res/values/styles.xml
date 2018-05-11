@@ -8,14 +8,22 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="grid_view_style">
+    <style name="recipe_list_card_view">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:columnWidth">@dimen/recipe_grid_column_width</item>
-        <item name="android:numColumns">auto_fit</item>
-        <item name="android:stretchMode">columnWidth</item>
-        <item name="android:gravity">center</item>
-        <item name="android:background">@android:color/background_dark</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="recipe_list_title">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:gravity">center_horizontal</item>
     </style>
 
 </resources>

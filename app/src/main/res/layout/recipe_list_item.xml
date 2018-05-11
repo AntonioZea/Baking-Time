@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout
+<android.support.v7.widget.CardView
 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
     android:id="@+id/recipe_list_click_view"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:background="?android:attr/selectableItemBackground">
+    style="@style/recipe_list_card_view">
 
-    <TextView
-        android:id="@+id/recipe_name_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:text="Arroz con gandules."/>
+    <LinearLayout
 
-</FrameLayout>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="48dp"
+        android:paddingBottom="48dp">
+
+        <TextView
+            android:id="@+id/recipe_name_text_view"
+            style="@style/recipe_list_title"
+            tools:text="Arroz con gandules."/>
+
+    </LinearLayout>
+
+
+</android.support.v7.widget.CardView>
+
+
+
