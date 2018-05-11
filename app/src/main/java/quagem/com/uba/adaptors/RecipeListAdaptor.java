@@ -61,18 +61,13 @@ public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public long getItemId(int position) {
-        return listData.get(position).getId();
-    }
-
-    @Override
     public int getItemCount() {
         return listData.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private long recipeId;
+        private String recipeId;
 
         @BindView(R.id.recipe_name_text_view) TextView mName;
         @BindView(R.id.recipe_list_click_view) FrameLayout mClickView;

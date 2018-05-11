@@ -3,6 +3,7 @@
     <string name="app_name">Udacity Baking App</string>
     <string name="action_settings">Settings</string>
 
-    <string name="connection_error">No Connection</string>
+    <string name="connection_error">No connection.</string>
+    <string name="error_loading_data">Error loading data.</string>
 
 </resources>

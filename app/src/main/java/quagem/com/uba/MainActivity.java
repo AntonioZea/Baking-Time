@@ -1,18 +1,18 @@
 package quagem.com.uba;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -23,23 +23,22 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import quagem.com.uba.model.Recipe;
+import quagem.com.uba.fragments.RecipeListFragment;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String> {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static int LOADER_ID = 101;
+    public final static String JSON_EXTRA = "json_extra";
 
-    private List<Recipe> listData;
+    private String mJsonData = null;
+
     @BindView(R.id.progress_bar) ProgressBar progressBar;
 
     @Override
@@ -49,14 +48,26 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        if (isConnected()) getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-        else Toast.makeText(this, R.string.connection_error, Toast.LENGTH_LONG).show();
+        if (savedInstanceState != null) {
+
+            if (savedInstanceState.containsKey(JSON_EXTRA))
+                mJsonData = savedInstanceState.getString(JSON_EXTRA);
+            else Toast.makeText(this, R.string.error_loading_data, Toast.LENGTH_LONG).show();
+
+        } else {
+
+            if (isConnected()) {
+                // This will load json from network and load RecipeListFragment only once.
+                getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
+            } else Toast.makeText(this, R.string.connection_error, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        // getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -75,6 +86,13 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.i(TAG, "onSaveInstanceState");
+        if (mJsonData != null) outState.putString(JSON_EXTRA, mJsonData);
+    }
+
     @NonNull
     @Override
     public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
@@ -86,11 +104,23 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
-        Log.i(TAG, "onLoadFinished: " + data);
+        Log.i(TAG, "onLoadFinished");
+
+        mJsonData = data; // save json network data.
+
+        Bundle bundle = new Bundle();
+        bundle.putString(JSON_EXTRA, mJsonData);
+
+        Fragment fragment = new RecipeListFragment();
+        fragment.setArguments(bundle);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
 
         progressBar.setVisibility(View.GONE);
     }
-
     @Override
     public void onLoaderReset(@NonNull Loader<String> loader) {
 

@@ -7,19 +7,23 @@ package quagem.com.uba.model;
 
 public class Recipe {
 
-    private int mId;
+    private String mId;
     private String mName;
 
-    public Recipe(int id, String name) {
+    public Recipe(){
+
+    }
+
+    public Recipe(String id, String name) {
         mId = id;
         mName = name;
     }
 
-    public int getId() {
+    public String getId() {
         return mId;
     }
 
-    public void setId(int mId) {
+    public void setId(String mId) {
         this.mId = mId;
     }
 
