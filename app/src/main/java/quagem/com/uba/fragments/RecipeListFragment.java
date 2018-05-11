@@ -1,9 +1,11 @@
 package quagem.com.uba.fragments;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -32,11 +34,11 @@ public class RecipeListFragment extends Fragment {
 
     @BindView(R.id.recipe_list_view) RecyclerView recyclerView;
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate");
+
         setRetainInstance(true);
     }
 
@@ -59,7 +61,13 @@ public class RecipeListFragment extends Fragment {
 
             RecipeListAdaptor recipeListAdaptor = new RecipeListAdaptor(sparseJson(json));
 
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+            RecyclerView.LayoutManager layoutManager;
+
+            int orientation = getResources().getConfiguration().orientation;
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE)
+                layoutManager = new GridLayoutManager(getContext(),2);
+            else
+                layoutManager = new LinearLayoutManager(getContext());
 
             recyclerView.setHasFixedSize(true);
             recyclerView.setAdapter(recipeListAdaptor);

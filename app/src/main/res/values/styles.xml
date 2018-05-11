@@ -13,10 +13,20 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
-        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:layout_marginLeft">@dimen/recipe_list_card_view_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/recipe_list_card_view_margin_right</item>
+        <item name="android:layout_marginTop">@dimen/recipe_list_card_view_margin_top</item>
         <item name="android:foreground">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="recipe_list_linear_layout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:paddingLeft">@dimen/recipe_list_padding_l</item>
+        <item name="android:paddingRight">@dimen/recipe_list_padding_r</item>
+        <item name="android:paddingTop">@dimen/recipe_list_padding_t</item>
+        <item name="android:paddingBottom">@dimen/recipe_list_padding_b</item>
     </style>
 
     <style name="recipe_list_title">
