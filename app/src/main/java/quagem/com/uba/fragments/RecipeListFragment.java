@@ -1,5 +1,6 @@
 package quagem.com.uba.fragments;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,8 +11,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -32,7 +35,26 @@ public class RecipeListFragment extends Fragment {
 
     public static final String TAG = RecipeListFragment.class.getSimpleName();
 
+    OnRecipeClickListener mCallBack;
+
+    public interface OnRecipeClickListener {
+        void onRecipeSelected(String recipeId);
+    }
+
     @BindView(R.id.recipe_list_view) RecyclerView recyclerView;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // Host activity implements callback.
+        try {
+            mCallBack = (OnRecipeClickListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " need to implement callback");
+        }
+
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,7 +72,7 @@ public class RecipeListFragment extends Fragment {
 
         View rootView;
 
-        rootView = inflater.inflate(R.layout.recipe_list, container, false);
+        rootView = inflater.inflate(R.layout.fragment_recipe_list, container, false);
         ButterKnife.bind(this, rootView);
 
         if (getArguments() == null || !getArguments().containsKey(MainActivity.JSON_EXTRA))
@@ -59,7 +81,8 @@ public class RecipeListFragment extends Fragment {
 
             String json = getArguments().getString(MainActivity.JSON_EXTRA);
 
-            RecipeListAdaptor recipeListAdaptor = new RecipeListAdaptor(sparseJson(json));
+            RecipeListAdaptor recipeListAdaptor =
+                    new RecipeListAdaptor(mCallBack, sparseJson(json));
 
             RecyclerView.LayoutManager layoutManager;
 
@@ -72,16 +95,6 @@ public class RecipeListFragment extends Fragment {
             recyclerView.setHasFixedSize(true);
             recyclerView.setAdapter(recipeListAdaptor);
             recyclerView.setLayoutManager(layoutManager);
-
-            recyclerView.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    // TODO: 5/10/2018 Try to code click here.
-                    Log.i(TAG, "View Clicked: " + v.toString());
-                }
-            });
-
         }
 
         return rootView;
@@ -110,8 +123,6 @@ public class RecipeListFragment extends Fragment {
             final JSONArray recipes = new JSONArray(json);
 
             Recipe recipeData;
-
-            Log.i(TAG, "RECIPE QUANTITY: " + recipes.length());
 
             for (int i = 0; i < recipes.length(); i++) {
 

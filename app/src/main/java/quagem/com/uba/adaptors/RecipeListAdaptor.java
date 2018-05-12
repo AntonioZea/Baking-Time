@@ -1,8 +1,10 @@
 package quagem.com.uba.adaptors;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import quagem.com.uba.R;
+import quagem.com.uba.fragments.RecipeListFragment;
 import quagem.com.uba.model.Recipe;
 
 /**
@@ -23,12 +26,15 @@ import quagem.com.uba.model.Recipe;
 
 public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public static final String TAG = RecipeListAdaptor.class.getSimpleName();
+    private static final String TAG = RecipeListAdaptor.class.getSimpleName();
 
-    private List<Recipe> listData;
+    private List<Recipe> mListData;
+    private RecipeListFragment.OnRecipeClickListener mListener;
 
-    public RecipeListAdaptor(List<Recipe> listData) {
-        this.listData = listData;
+    public RecipeListAdaptor(RecipeListFragment.OnRecipeClickListener listener,
+                             List<Recipe> listData) {
+        mListData = listData;
+        mListener = listener;
     }
 
     @NonNull
@@ -54,15 +60,15 @@ public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         ViewHolder viewHolder = (ViewHolder)holder;
 
-        String name = listData.get(position).getName();
+        String name = mListData.get(position).getName();
 
-        viewHolder.recipeId = listData.get(position).getId();
+        viewHolder.recipeId = mListData.get(position).getId();
         viewHolder.mName.setText(name);
     }
 
     @Override
     public int getItemCount() {
-        return listData.size();
+        return mListData.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -80,8 +86,7 @@ public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHol
             mClickView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: 5/10/2018 Tell main activity.
-
+                    mListener.onRecipeSelected(recipeId);
                 }
             });
 

@@ -31,7 +31,7 @@ import butterknife.ButterKnife;
 import quagem.com.uba.fragments.RecipeListFragment;
 
 public class MainActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<String> {
+        LoaderManager.LoaderCallbacks<String>, RecipeListFragment.OnRecipeClickListener {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static int LOADER_ID = 101;
@@ -122,10 +122,11 @@ public class MainActivity extends AppCompatActivity implements
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.replace(R.id.fragment_container, fragment).commit();
+        fragmentTransaction.replace(R.id.recipe_list_container, fragment).commit();
 
         progressBar.setVisibility(View.GONE);
     }
+
     @Override
     public void onLoaderReset(@NonNull Loader<String> loader) {
 
@@ -143,6 +144,11 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         return false;
+    }
+
+    @Override
+    public void onRecipeSelected(String recipeId) {
+        Log.i(TAG, "Recipe clicked!: " + recipeId);
     }
 
     public static class RecipeListAsyncTaskLoader extends
