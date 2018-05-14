@@ -105,6 +105,7 @@ public class RecipeStepsListFragment extends Fragment {
         listItemList = new ArrayList<>();
 
         final String ID = "id";
+        final String NAME = "name";
         final String STEPS = "steps";
         final String SHORT_DESCRIPTION = "shortDescription";
 
@@ -122,6 +123,8 @@ public class RecipeStepsListFragment extends Fragment {
                 JSONObject recipe = recipes.getJSONObject(i);
 
                 if (recipe.getString(ID).equals(mRecipeId)) {
+
+                    if (getActivity() != null) getActivity().setTitle(recipe.getString(NAME));
 
                     JSONArray steps = recipe.getJSONArray(STEPS);
 

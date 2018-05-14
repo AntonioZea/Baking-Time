@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements
     private final static int LOADER_ID = 101;
 
     public final static String JSON_EXTRA = "jsonExtra";
-    public final static String TITLE_EXTRA = "titleExtra";
 
     private String mJsonData = null;
 
