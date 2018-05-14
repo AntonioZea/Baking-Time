@@ -1,6 +1,7 @@
 package quagem.com.uba;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -29,13 +30,16 @@ import java.util.Scanner;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import quagem.com.uba.fragments.RecipeListFragment;
+import quagem.com.uba.interfaces.ListItemSelectListener;
 
 public class MainActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<String>, RecipeListFragment.OnRecipeClickListener {
+        LoaderManager.LoaderCallbacks<String>, ListItemSelectListener {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static int LOADER_ID = 101;
-    public final static String JSON_EXTRA = "json_extra";
+
+    public final static String JSON_EXTRA = "jsonExtra";
+    public final static String TITLE_EXTRA = "titleExtra";
 
     private String mJsonData = null;
 
@@ -147,8 +151,15 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onRecipeSelected(String recipeId) {
-        Log.i(TAG, "Recipe clicked!: " + recipeId);
+    public void OnListItemSelect(String itemId) {
+        Log.i(TAG, "ListItem clicked!: " + itemId);
+
+        Intent intent = new Intent(this, RecipeDetailsActivity.class);
+
+        intent.putExtra(MainActivity.JSON_EXTRA, mJsonData);
+        intent.putExtra(RecipeDetailsActivity.SELECTED_RECIPE_ID, itemId);
+
+        startActivity(intent);
     }
 
     public static class RecipeListAsyncTaskLoader extends

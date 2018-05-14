@@ -1,20 +1,15 @@
 package quagem.com.uba.model;
 
-/**
- * {@link Recipe} Represents a recipe that the user can select.
- * It contains an id, name, ingredients list and step by step instructions.
- */
-
-public class Recipe {
+public class ListItem {
 
     private String mId;
     private String mName;
 
-    public Recipe(){
+    public ListItem(){
 
     }
 
-    public Recipe(String id, String name) {
+    public ListItem(String id, String name) {
         mId = id;
         mName = name;
     }

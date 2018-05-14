@@ -1,10 +1,8 @@
 package quagem.com.uba.adaptors;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,23 +14,26 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import quagem.com.uba.R;
-import quagem.com.uba.fragments.RecipeListFragment;
-import quagem.com.uba.model.Recipe;
+import quagem.com.uba.interfaces.ListItemSelectListener;
+import quagem.com.uba.model.ListItem;
 
 /**
  * Created by quagem on 2/8/18.
  *
  */
 
-public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+/**
+ * {@link SimpleListAdaptor} A simple list adaptor to manage a name and an id.
+ */
+public class SimpleListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String TAG = RecipeListAdaptor.class.getSimpleName();
+    private static final String TAG = SimpleListAdaptor.class.getSimpleName();
 
-    private List<Recipe> mListData;
-    private RecipeListFragment.OnRecipeClickListener mListener;
+    private List<ListItem> mListData;
+    private ListItemSelectListener mListener;
 
-    public RecipeListAdaptor(RecipeListFragment.OnRecipeClickListener listener,
-                             List<Recipe> listData) {
+    public SimpleListAdaptor(ListItemSelectListener listener,
+                             List<ListItem> listData) {
         mListData = listData;
         mListener = listener;
     }
@@ -62,7 +63,7 @@ public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         String name = mListData.get(position).getName();
 
-        viewHolder.recipeId = mListData.get(position).getId();
+        viewHolder.itemId = mListData.get(position).getId();
         viewHolder.mName.setText(name);
     }
 
@@ -73,7 +74,7 @@ public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private String recipeId;
+        private String itemId;
 
         @BindView(R.id.recipe_name_text_view) TextView mName;
         @BindView(R.id.recipe_list_click_view) FrameLayout mClickView;
@@ -86,7 +87,7 @@ public class RecipeListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHol
             mClickView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.onRecipeSelected(recipeId);
+                    mListener.OnListItemSelect(itemId);
                 }
             });
 

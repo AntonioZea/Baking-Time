@@ -1,12 +1,10 @@
 package quagem.com.uba.fragments;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,19 +22,23 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import quagem.com.uba.MainActivity;
+
 import quagem.com.uba.R;
 import quagem.com.uba.adaptors.SimpleListAdaptor;
 import quagem.com.uba.interfaces.ListItemSelectListener;
 import quagem.com.uba.model.ListItem;
 
-public class RecipeListFragment extends Fragment {
+import static quagem.com.uba.MainActivity.JSON_EXTRA;
+import static quagem.com.uba.RecipeDetailsActivity.SELECTED_RECIPE_ID;
+
+public class RecipeStepsListFragment extends Fragment {
 
     public static final String TAG = RecipeListFragment.class.getSimpleName();
 
-    ListItemSelectListener mCallBack;
+    private String mRecipeId;
+    private ListItemSelectListener mCallBack;
 
-    @BindView(R.id.recipe_list_view) RecyclerView recyclerView;
+    @BindView(R.id.recipe_steps_list_view) RecyclerView recyclerView;
 
     @Override
     public void onAttach(Context context) {
@@ -48,7 +50,6 @@ public class RecipeListFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " need to implement callback");
         }
-
     }
 
     @Override
@@ -67,32 +68,34 @@ public class RecipeListFragment extends Fragment {
 
         View rootView;
 
-        rootView = inflater.inflate(R.layout.fragment_recipe_list, container, false);
+        rootView = inflater.inflate(R.layout.fragment_recipe_steps_list,
+                container, false);
+
         ButterKnife.bind(this, rootView);
 
-        if (getArguments() == null || !getArguments().containsKey(MainActivity.JSON_EXTRA))
-            Toast.makeText(getContext(), R.string.error_loading_data, Toast.LENGTH_LONG).show();
-        else {
+        Bundle bundle = getArguments();
 
-            String json = getArguments().getString(MainActivity.JSON_EXTRA);
+        if (bundle != null &&
+                bundle.containsKey(JSON_EXTRA) &&
+                bundle.containsKey(SELECTED_RECIPE_ID)) {
+
+            String mJsonData = bundle.getString(JSON_EXTRA);
+            mRecipeId = bundle.getString(SELECTED_RECIPE_ID);
 
             SimpleListAdaptor recipeListAdaptor =
-                    new SimpleListAdaptor(mCallBack, sparseJson(json));
-
-            RecyclerView.LayoutManager layoutManager;
-
-            int orientation = getResources().getConfiguration().orientation;
-            if (orientation == Configuration.ORIENTATION_LANDSCAPE)
-                layoutManager = new GridLayoutManager(getContext(),2);
-            else
-                layoutManager = new LinearLayoutManager(getContext());
+                    new SimpleListAdaptor(mCallBack, sparseJson(mJsonData));
 
             recyclerView.setHasFixedSize(true);
             recyclerView.setAdapter(recipeListAdaptor);
-            recyclerView.setLayoutManager(layoutManager);
-        }
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        } else errorLoadingData();
 
         return rootView;
+    }
+
+    private void errorLoadingData(){
+        Toast.makeText(getContext(), R.string.error_loading_data, Toast.LENGTH_LONG).show();
     }
 
     private List<ListItem> sparseJson(String json) {
@@ -102,24 +105,39 @@ public class RecipeListFragment extends Fragment {
         listItemList = new ArrayList<>();
 
         final String ID = "id";
-        final String NAME = "name";
+        final String STEPS = "steps";
+        final String SHORT_DESCRIPTION = "shortDescription";
+
+        // First add the ingredients as step #1 as displayed on udacity web page.
+        ListItem listItem = new
+                ListItem("-1", getResources().getString(R.string.ingredients));
+        listItemList.add(listItem);
 
         try {
 
             final JSONArray recipes = new JSONArray(json);
 
-            ListItem listItemData;
-
             for (int i = 0; i < recipes.length(); i++) {
-
-                listItemData = new ListItem();
 
                 JSONObject recipe = recipes.getJSONObject(i);
 
-                listItemData.setName(recipe.getString(NAME));
-                listItemData.setId(recipe.getString(ID));
+                if (recipe.getString(ID).equals(mRecipeId)) {
 
-                listItemList.add(listItemData);
+                    JSONArray steps = recipe.getJSONArray(STEPS);
+
+                    for (int ii = 0; ii < steps.length(); ii++) {
+
+                        JSONObject step = steps.getJSONObject(ii);
+
+                        listItem = new ListItem(
+                                step.getString(ID),
+                                step.getString(SHORT_DESCRIPTION));
+
+                        listItemList.add(listItem);
+                    }
+
+                    break;
+                }
             }
 
 
@@ -129,5 +147,4 @@ public class RecipeListFragment extends Fragment {
 
         return listItemList;
     }
-
 }
