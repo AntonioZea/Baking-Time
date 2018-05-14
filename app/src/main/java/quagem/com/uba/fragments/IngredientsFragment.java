@@ -1,62 +1,43 @@
 package quagem.com.uba.fragments;
 
-import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import quagem.com.uba.R;
-import quagem.com.uba.adaptors.SimpleListAdaptor;
-import quagem.com.uba.interfaces.ListItemSelectListener;
-import quagem.com.uba.model.ListItem;
 
 import static quagem.com.uba.MainActivity.JSON_EXTRA;
 import static quagem.com.uba.RecipeDetailsActivity.SELECTED_RECIPE_ID;
 
-public class RecipeStepsListFragment extends Fragment {
+public class IngredientsFragment extends Fragment {
 
     public static final String TAG = RecipeListFragment.class.getSimpleName();
 
     private String mRecipeId;
-    private ListItemSelectListener mCallBack;
-
-    @BindView(R.id.recipe_steps_list_view) RecyclerView recyclerView;
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        // Host activity implements callback.
-        try {
-            mCallBack = (ListItemSelectListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " need to implement callback");
-        }
-    }
+    @BindView(R.id.ingredients_text_view) TextView mIngredientsTextView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "onCreate");
-
         setRetainInstance(true);
     }
 
@@ -68,9 +49,7 @@ public class RecipeStepsListFragment extends Fragment {
 
         View rootView;
 
-        rootView = inflater.inflate(R.layout.fragment_recipe_steps_list,
-                container, false);
-
+        rootView = inflater.inflate(R.layout.fragment_ingredients, container, false);
         ButterKnife.bind(this, rootView);
 
         Bundle bundle = getArguments();
@@ -79,36 +58,27 @@ public class RecipeStepsListFragment extends Fragment {
                 bundle.containsKey(JSON_EXTRA) &&
                 bundle.containsKey(SELECTED_RECIPE_ID)) {
 
-            String mJsonData = bundle.getString(JSON_EXTRA);
+            String mJson = bundle.getString(JSON_EXTRA);
             mRecipeId = bundle.getString(SELECTED_RECIPE_ID);
 
-            SimpleListAdaptor recipeListAdaptor =
-                    new SimpleListAdaptor(mCallBack, sparseJson(mJsonData));
+            mIngredientsTextView.setText(sparseJson(mJson));
 
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setAdapter(recipeListAdaptor);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         } else Toast.makeText(getContext(), R.string.error_loading_data, Toast.LENGTH_LONG).show();
 
         return rootView;
     }
 
-    private List<ListItem> sparseJson(String json) {
+    private String sparseJson(String json) {
 
-        List<ListItem> listItemList;
-
-        listItemList = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
 
         final String ID = "id";
         final String NAME = "name";
-        final String STEPS = "steps";
-        final String SHORT_DESCRIPTION = "shortDescription";
-
-        // First add the ingredients as step #1 as displayed on udacity web page.
-        ListItem listItem = new
-                ListItem("-1", getResources().getString(R.string.ingredients));
-        listItemList.add(listItem);
+        final String MEASURE = "measure";
+        final String QUANTITY = "quantity";
+        final String INGREDIENT = "ingredient";
+        final String INGREDIENTS = "ingredients";
 
         try {
 
@@ -122,17 +92,23 @@ public class RecipeStepsListFragment extends Fragment {
 
                     if (getActivity() != null) getActivity().setTitle(recipe.getString(NAME));
 
-                    JSONArray steps = recipe.getJSONArray(STEPS);
+                    JSONArray ingredients = recipe.getJSONArray(INGREDIENTS);
 
-                    for (int ii = 0; ii < steps.length(); ii++) {
+                    int ingredientCount = 0;
 
-                        JSONObject step = steps.getJSONObject(ii);
+                    for (int ii = 0; ii < ingredients.length(); ii++) {
 
-                        listItem = new ListItem(
-                                step.getString(ID),
-                                step.getString(SHORT_DESCRIPTION));
+                        JSONObject ingredient = ingredients.getJSONObject(ii);
 
-                        listItemList.add(listItem);
+                        stringBuilder.append(++ingredientCount);
+                        stringBuilder.append(". ");
+                        stringBuilder.append(ingredient.getString(INGREDIENT));
+                        stringBuilder.append(" ");
+                        stringBuilder.append(ingredient.getString(QUANTITY));
+                        stringBuilder.append(" ");
+                        stringBuilder.append(ingredient.getString(MEASURE));
+                        stringBuilder.append(" ");
+                        stringBuilder.append("\n");
                     }
 
                     break;
@@ -144,6 +120,7 @@ public class RecipeStepsListFragment extends Fragment {
             e.printStackTrace();
         }
 
-        return listItemList;
+        return stringBuilder.toString();
     }
+
 }

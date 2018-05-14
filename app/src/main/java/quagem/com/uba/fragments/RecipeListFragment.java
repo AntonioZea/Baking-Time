@@ -129,5 +129,4 @@ public class RecipeListFragment extends Fragment {
 
         return listItemList;
     }
-
 }

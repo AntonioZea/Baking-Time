@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import quagem.com.uba.fragments.IngredientsFragment;
 import quagem.com.uba.fragments.RecipeListFragment;
 import quagem.com.uba.fragments.RecipeStepsListFragment;
 import quagem.com.uba.interfaces.ListItemSelectListener;
@@ -39,7 +40,7 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
             mRecipeId = intent.getStringExtra(SELECTED_RECIPE_ID);
 
             // Two pane mode.
-            //mTwoPane = findViewById(R.id.recipe_details_fragment_container) != null;
+            mTwoPane = findViewById(R.id.recipe_step_details_container) != null;
 
             Bundle bundle = new Bundle();
             bundle.putString(JSON_EXTRA, mJsonData);
@@ -52,6 +53,14 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             fragmentTransaction.replace(R.id.recipe_steps_container, fragment).commit();
+
+            if (mTwoPane) {
+
+                fragment = new IngredientsFragment();
+                fragment.setArguments(bundle);
+
+                fragmentTransaction.replace(R.id.recipe_step_details_container, fragment);
+            }
 
         } else {
             Toast.makeText(this, R.string.error_loading_data, Toast.LENGTH_LONG).show();
