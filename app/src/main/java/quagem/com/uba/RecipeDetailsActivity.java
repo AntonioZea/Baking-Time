@@ -6,11 +6,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.widget.Toast;
 
 import quagem.com.uba.fragments.IngredientsFragment;
-import quagem.com.uba.fragments.RecipeListFragment;
+import quagem.com.uba.fragments.RecipeStepDetails;
 import quagem.com.uba.fragments.RecipeStepsListFragment;
 import quagem.com.uba.interfaces.ListItemSelectListener;
 
@@ -21,9 +21,12 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
     private final static String TAG = RecipeDetailsActivity.class.getSimpleName();
 
     public final static String SELECTED_RECIPE_ID = "selectedRecipeId";
+    public final static String SELECTED_RECIPE_STEP_ID = "selectedRecipeStepId";
+    public final static String TWO_PANE = "twoPane";
 
     private boolean mTwoPane;
     private String mRecipeId;
+
     private String mJsonData = null;
 
     @Override
@@ -34,43 +37,86 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
 
         Intent intent = getIntent();
 
-        if (intent.hasExtra(JSON_EXTRA) && intent.hasExtra(SELECTED_RECIPE_ID)) {
+        if (savedInstanceState != null){
 
-            mJsonData = intent.getStringExtra(JSON_EXTRA);
-            mRecipeId = intent.getStringExtra(SELECTED_RECIPE_ID);
+            if (savedInstanceState.containsKey(JSON_EXTRA))
+                mJsonData = savedInstanceState.getString(JSON_EXTRA);
 
-            // Two pane mode.
-            mTwoPane = findViewById(R.id.recipe_step_details_container) != null;
-
-            Bundle bundle = new Bundle();
-            bundle.putString(JSON_EXTRA, mJsonData);
-            bundle.putString(SELECTED_RECIPE_ID, mRecipeId);
-
-            Fragment fragment = new RecipeStepsListFragment();
-            fragment.setArguments(bundle);
-
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-            fragmentTransaction.replace(R.id.recipe_steps_container, fragment).commit();
-
-            if (mTwoPane) {
-
-                fragment = new IngredientsFragment();
-                fragment.setArguments(bundle);
-
-                fragmentTransaction.replace(R.id.recipe_step_details_container, fragment);
-            }
+            if (savedInstanceState.containsKey(SELECTED_RECIPE_ID))
+                mRecipeId = savedInstanceState.getString(SELECTED_RECIPE_ID);
 
         } else {
-            Toast.makeText(this, R.string.error_loading_data, Toast.LENGTH_LONG).show();
-            finish();
+
+            if (intent.hasExtra(JSON_EXTRA) && intent.hasExtra(SELECTED_RECIPE_ID)) {
+
+                mJsonData = intent.getStringExtra(JSON_EXTRA);
+                mRecipeId = intent.getStringExtra(SELECTED_RECIPE_ID);
+
+                // Two pane mode.
+                mTwoPane = findViewById(R.id.recipe_step_details_container) != null;
+
+                Bundle bundle = new Bundle();
+                bundle.putString(JSON_EXTRA, mJsonData);
+                bundle.putString(SELECTED_RECIPE_ID, mRecipeId);
+
+                Fragment fragment = new RecipeStepsListFragment();
+                fragment.setArguments(bundle);
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                fragmentTransaction.replace(R.id.recipe_steps_container, fragment).commit();
+
+                // Ingredients fragment id = -1.
+                if (mTwoPane) inflateDetailsFragment("-1");
+
+            } else {
+                Toast.makeText(this, R.string.error_loading_data, Toast.LENGTH_LONG).show();
+                finish();
+            }
+
         }
+
+    }
+
+    private void inflateDetailsFragment(String recipeStepId) {
+        Log.i(TAG, "inflateDetailsFragment: " + recipeStepId);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(TWO_PANE, mTwoPane);
+        bundle.putString(JSON_EXTRA, mJsonData);
+        bundle.putString(SELECTED_RECIPE_ID, mRecipeId);
+        bundle.putString(SELECTED_RECIPE_STEP_ID, recipeStepId);
+
+        Fragment fragment;
+
+        if (recipeStepId.equals("-1")) fragment = new IngredientsFragment(); //Ingredients fragment.
+        else fragment = new RecipeStepDetails();
+
+        fragment.setArguments(bundle);
+
+        if (mTwoPane)
+            fragmentTransaction.replace(R.id.recipe_step_details_container, fragment).commit();
+        else
+            fragmentTransaction.add(R.id.recipe_steps_container, fragment).addToBackStack(null)
+                    .commit();
 
     }
 
     @Override
     public void OnListItemSelect(String itemId) {
-        // TODO: 5/13/2018
+        Log.i(TAG, "OnListItemSelect: " + itemId);
+        inflateDetailsFragment(itemId);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.i(TAG, "onSaveInstanceState");
+        if (mJsonData != null) outState.putString(JSON_EXTRA, mJsonData);
+        if (mRecipeId != null) outState.putString(SELECTED_RECIPE_ID, mRecipeId);
     }
 }

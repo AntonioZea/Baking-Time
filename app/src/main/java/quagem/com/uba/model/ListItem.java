@@ -6,7 +6,6 @@ public class ListItem {
     private String mName;
 
     public ListItem(){
-
     }
 
     public ListItem(String id, String name) {

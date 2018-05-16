@@ -8,4 +8,9 @@
 
     <string name="ingredients">Ingredients</string>
 
+    <!-- Context Descriptions -->
+    <string name="recipe_step_image">Recipe step image</string>
+    <string name="previous_step_button">Previous step button</string>
+    <string name="next_step_button">Next step button</string>
+
 </resources>
