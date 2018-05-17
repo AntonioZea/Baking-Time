@@ -35,7 +35,6 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
 
         setContentView(R.layout.activity_recipe_details);
 
-        // Two pane mode.
         mTwoPane = findViewById(R.id.recipe_step_details_container) != null;
 
         Intent intent = getIntent();
@@ -102,7 +101,6 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
         else
             fragmentTransaction.add(R.id.recipe_steps_container, fragment).addToBackStack(null)
                     .commit();
-
     }
 
     @Override

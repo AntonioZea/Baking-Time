@@ -87,9 +87,14 @@ public class RecipeStepDetailsFragment extends Fragment {
         Log.i(TAG, "onCreateView");
 
         View rootView;
+        int orientation = getResources().getConfiguration().orientation;
 
-        rootView = inflater.inflate(R.layout.fragment_recipe_step_details,
-                container, false);
+        if (orientation != Configuration.ORIENTATION_LANDSCAPE)
+            rootView = inflater.inflate(R.layout.fragment_recipe_step_details,
+                    container, false);
+        else
+            rootView = inflater.inflate(R.layout.fragment_recipe_step_details_landscape,
+                    container, false);
 
         ButterKnife.bind(this, rootView);
 
@@ -101,7 +106,6 @@ public class RecipeStepDetailsFragment extends Fragment {
                 bundle.containsKey(SELECTED_RECIPE_STEP_ID)) {
 
             // Set nav panel if is not two pane mode or landscape
-            int orientation = getResources().getConfiguration().orientation;
             if (!bundle.getBoolean(TWO_PANE) && orientation != Configuration.ORIENTATION_LANDSCAPE){
 
                 mControlPanel.setVisibility(View.VISIBLE);
