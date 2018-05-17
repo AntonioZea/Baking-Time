@@ -1,15 +1,20 @@
 package quagem.com.uba.fragments;
 
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,10 +49,11 @@ import quagem.com.uba.model.RecipeStep;
 import static quagem.com.uba.MainActivity.JSON_EXTRA;
 import static quagem.com.uba.RecipeDetailsActivity.SELECTED_RECIPE_ID;
 import static quagem.com.uba.RecipeDetailsActivity.SELECTED_RECIPE_STEP_ID;
+import static quagem.com.uba.RecipeDetailsActivity.TWO_PANE;
 
-public class RecipeStepDetails extends Fragment {
+public class RecipeStepDetailsFragment extends Fragment {
 
-    public static final String TAG = RecipeStepDetails.class.getSimpleName();
+    public static final String TAG = RecipeStepDetailsFragment.class.getSimpleName();
 
     private String mRecipeId;
     private String mCurrentStepId;
@@ -62,6 +68,10 @@ public class RecipeStepDetails extends Fragment {
     @BindView(R.id.recipe_step_image_view) ImageView mImageView;
     @BindView(R.id.recipe_step_video) SimpleExoPlayerView mExoPlayerView;
     @BindView(R.id.recipe_instructions_text_view) TextView mInstructionsTextView;
+
+    @BindView(R.id.recipe_nav_controls) LinearLayout mControlPanel;
+    @BindView(R.id.next_recipe_image_button) ImageButton mNextImageButton;
+    @BindView(R.id.previous_recipe_image_button) ImageButton mPrevImageButton;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -89,6 +99,27 @@ public class RecipeStepDetails extends Fragment {
                 bundle.containsKey(JSON_EXTRA) &&
                 bundle.containsKey(SELECTED_RECIPE_ID) &&
                 bundle.containsKey(SELECTED_RECIPE_STEP_ID)) {
+
+            // Set nav panel if is not two pane mode or landscape
+            int orientation = getResources().getConfiguration().orientation;
+            if (!bundle.getBoolean(TWO_PANE) && orientation != Configuration.ORIENTATION_LANDSCAPE){
+
+                mControlPanel.setVisibility(View.VISIBLE);
+
+                mNextImageButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i(TAG, "mNextImageButton");
+                    }
+                });
+
+                mPrevImageButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i(TAG, "mPrevImageButton");
+                    }
+                });
+            }
 
             mCurrentStepId = bundle.getString(SELECTED_RECIPE_STEP_ID);
             mRecipeId = bundle.getString(SELECTED_RECIPE_ID);

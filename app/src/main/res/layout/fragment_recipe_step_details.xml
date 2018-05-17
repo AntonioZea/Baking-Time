@@ -57,15 +57,14 @@
         android:visibility="gone">
 
         <ImageButton
-
-            android:id="@+id/next_recipe_image_button"
+            android:id="@+id/previous_recipe_image_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/previous_step_button"
             android:src="@drawable/ic_navigate_before_black_24dp" />
 
         <ImageButton
-            android:id="@+id/previous_recipe_image_button"
+            android:id="@+id/next_recipe_image_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/next_step_button"

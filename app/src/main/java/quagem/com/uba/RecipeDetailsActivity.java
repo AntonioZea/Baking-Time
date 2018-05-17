@@ -10,7 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import quagem.com.uba.fragments.IngredientsFragment;
-import quagem.com.uba.fragments.RecipeStepDetails;
+import quagem.com.uba.fragments.RecipeStepDetailsFragment;
 import quagem.com.uba.fragments.RecipeStepsListFragment;
 import quagem.com.uba.interfaces.ListItemSelectListener;
 
@@ -35,6 +35,9 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
 
         setContentView(R.layout.activity_recipe_details);
 
+        // Two pane mode.
+        mTwoPane = findViewById(R.id.recipe_step_details_container) != null;
+
         Intent intent = getIntent();
 
         if (savedInstanceState != null){
@@ -51,9 +54,6 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
 
                 mJsonData = intent.getStringExtra(JSON_EXTRA);
                 mRecipeId = intent.getStringExtra(SELECTED_RECIPE_ID);
-
-                // Two pane mode.
-                mTwoPane = findViewById(R.id.recipe_step_details_container) != null;
 
                 Bundle bundle = new Bundle();
                 bundle.putString(JSON_EXTRA, mJsonData);
@@ -76,7 +76,6 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
             }
 
         }
-
     }
 
     private void inflateDetailsFragment(String recipeStepId) {
@@ -94,7 +93,7 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
         Fragment fragment;
 
         if (recipeStepId.equals("-1")) fragment = new IngredientsFragment(); //Ingredients fragment.
-        else fragment = new RecipeStepDetails();
+        else fragment = new RecipeStepDetailsFragment();
 
         fragment.setArguments(bundle);
 
