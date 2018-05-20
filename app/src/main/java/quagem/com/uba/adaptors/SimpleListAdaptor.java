@@ -27,7 +27,7 @@ import quagem.com.uba.model.ListItem;
  */
 public class SimpleListAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String TAG = SimpleListAdaptor.class.getSimpleName();
+    public static final String TAG = SimpleListAdaptor.class.getSimpleName();
 
     private List<ListItem> mListData;
     private ListItemSelectListener mListener;

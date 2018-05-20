@@ -12,5 +12,7 @@
     <string name="recipe_step_image">Recipe step image</string>
     <string name="previous_step_button">Previous step button</string>
     <string name="next_step_button">Next step button</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 
 </resources>
