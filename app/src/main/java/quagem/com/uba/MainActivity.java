@@ -31,6 +31,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import quagem.com.uba.fragments.RecipeListFragment;
 import quagem.com.uba.interfaces.ListItemSelectListener;
+import quagem.com.uba.widget.WidgetProvider;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String>, ListItemSelectListener {
@@ -128,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements
         fragmentTransaction.replace(R.id.recipe_list_container, fragment).commit();
 
         progressBar.setVisibility(View.GONE);
+
+        WidgetProvider.sendRefreshBroadcast(this);
     }
 
     @Override

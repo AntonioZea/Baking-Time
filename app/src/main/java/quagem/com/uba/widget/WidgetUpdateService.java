@@ -38,8 +38,8 @@ public class WidgetUpdateService extends IntentService {
         int[] widgetIds = appWidgetManager.getAppWidgetIds(
                 new ComponentName(this, WidgetProvider.class));
 
-        appWidgetManager.notifyAppWidgetViewDataChanged(widgetIds, R.id.recipe_list_view_widget);
-        WidgetProvider.updateAppWidget(this, appWidgetManager, widgetIds);
+        appWidgetManager.notifyAppWidgetViewDataChanged(widgetIds, R.id.widget_list_view);
+        //WidgetProvider.updateAppWidget(this, appWidgetManager, widgetIds);
 
     }
 
