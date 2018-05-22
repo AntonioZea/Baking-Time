@@ -2,73 +2,74 @@ package quagem.com.uba.widget;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import quagem.com.uba.MainActivity;
 import quagem.com.uba.R;
+
+import static quagem.com.uba.RecipeDetailsActivity.SELECTED_RECIPE_ID;
 
 public class WidgetRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private final static String TAG = WidgetRemoteViewFactory.class.getSimpleName();
 
     private Context mContext;
-    private List<String> test;
 
-    public WidgetRemoteViewFactory(Context mContext, Intent intent) {
-        Log.i(TAG, "WidgetRemoteViewFactory");
-        this.mContext = mContext;
+    WidgetRemoteViewFactory(Context context) {
+        mContext = context;
     }
 
     @Override
     public void onCreate() {
-        Log.i(TAG, "onCreate");
     }
 
     @Override
     public void onDataSetChanged() {
         Log.i(TAG, "onDataSetChanged");
-        // TODO: 5/20/2018 get jSon.
-        test = new ArrayList<>(5);
-        test.add("test 1");
-        test.add("test 2");
-        test.add("test 3");
-        test.add("test 4");
-        test.add("test 5");
+
+        // TODO: 5/22/2018 get json data.
     }
 
     @Override
     public void onDestroy() {
-        Log.i(TAG, "onDestroy");
+
     }
 
     @Override
     public int getCount() {
-        Log.i(TAG, "getCount");
-        return 5; // TODO: 5/20/2018
+        return 15;
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
-        Log.i(TAG, "getViewAt");
+        // TODO: 5/22/2018
+
         RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.widget_list_item);
-        views.setTextViewText(R.id.widget_text_view, "FUCK!!!!!");
+        views.setTextViewText(R.id.widget_text_view, "FUCKING TEST");
+
+        Bundle bundle = new Bundle();
+        bundle.putString(MainActivity.JSON_EXTRA, "");
+        bundle.putString(SELECTED_RECIPE_ID, "");
+
+        Intent fillInIntent = new Intent();
+        fillInIntent.putExtras(bundle);
+
+        views.setOnClickFillInIntent(R.id.widget_text_view, fillInIntent);
 
         return views;
     }
 
     @Override
     public RemoteViews getLoadingView() {
-        Log.i(TAG, "getLoadingView");
         return null;
     }
 
     @Override
     public int getViewTypeCount() {
-        return 0;
+        return 1;
     }
 
     @Override

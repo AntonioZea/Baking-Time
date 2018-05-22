@@ -87,6 +87,9 @@ public class RecipeStepDetailsFragment extends Fragment {
         Log.i(TAG, "onCreateView");
 
         View rootView;
+
+        // TODO: 5/21/2018 fix landscape fullscreen video when there is no video.
+
         int orientation = getResources().getConfiguration().orientation;
 
         if (orientation != Configuration.ORIENTATION_LANDSCAPE)
