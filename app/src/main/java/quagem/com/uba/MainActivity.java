@@ -1,7 +1,11 @@
 package quagem.com.uba;
 
+import android.annotation.SuppressLint;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -31,6 +35,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import quagem.com.uba.fragments.RecipeListFragment;
 import quagem.com.uba.interfaces.ListItemSelectListener;
+import quagem.com.uba.widget.WidgetProvider;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String>, ListItemSelectListener {
@@ -110,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements
         return new RecipeListAsyncTaskLoader(this);
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
         Log.i(TAG, "onLoadFinished");
@@ -128,6 +134,19 @@ public class MainActivity extends AppCompatActivity implements
         fragmentTransaction.replace(R.id.recipe_list_container, fragment).commit();
 
         progressBar.setVisibility(View.GONE);
+
+        SharedPreferences sharedPref = getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(JSON_EXTRA, mJsonData);
+        editor.commit(); // no apply() I need this done now.
+
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
+                new ComponentName(this, WidgetProvider.class));
+
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_view);
     }
 
     @Override
