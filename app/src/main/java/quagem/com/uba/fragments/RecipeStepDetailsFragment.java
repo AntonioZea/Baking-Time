@@ -1,13 +1,11 @@
 package quagem.com.uba.fragments;
 
 import android.content.res.Configuration;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +57,7 @@ public class RecipeStepDetailsFragment extends Fragment {
     private String mCurrentStepId;
     private SimpleExoPlayer mExoPlayer;
 
-    private List<RecipeStep> recipeSteps;
+    private List<RecipeStep> mRecipeSteps;
 
     // Mime type
     private static final String VIDEO = "video";
@@ -86,20 +84,7 @@ public class RecipeStepDetailsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView");
 
-        View rootView;
-
-        // TODO: 5/21/2018 fix landscape fullscreen video when there is no video.
-
-        int orientation = getResources().getConfiguration().orientation;
-
-        if (orientation != Configuration.ORIENTATION_LANDSCAPE)
-            rootView = inflater.inflate(R.layout.fragment_recipe_step_details,
-                    container, false);
-        else
-            rootView = inflater.inflate(R.layout.fragment_recipe_step_details_landscape,
-                    container, false);
-
-        ButterKnife.bind(this, rootView);
+        View rootView = null;
 
         Bundle bundle = getArguments();
 
@@ -107,6 +92,34 @@ public class RecipeStepDetailsFragment extends Fragment {
                 bundle.containsKey(JSON_EXTRA) &&
                 bundle.containsKey(SELECTED_RECIPE_ID) &&
                 bundle.containsKey(SELECTED_RECIPE_STEP_ID)) {
+
+            if (savedInstanceState != null &&
+                    savedInstanceState.containsKey(SELECTED_RECIPE_STEP_ID))
+                mCurrentStepId = savedInstanceState.getString(SELECTED_RECIPE_STEP_ID);
+            else mCurrentStepId = bundle.getString(SELECTED_RECIPE_STEP_ID);
+
+            mRecipeId = bundle.getString(SELECTED_RECIPE_ID);
+            sparseJson(bundle.getString(JSON_EXTRA));
+
+            // Get recipe step to see if there is a video.
+            boolean isVideo = false;
+            for (RecipeStep rs : mRecipeSteps) {
+                if (rs.getId().equals(mCurrentStepId) && rs.getVideoURL() != null) {
+                    isVideo = true;
+                    break;
+                }
+            }
+
+            int orientation = getResources().getConfiguration().orientation;
+
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE && isVideo)
+                rootView = inflater.inflate(R.layout.fragment_recipe_step_details_landscape,
+                        container, false);
+            else
+                rootView = inflater.inflate(R.layout.fragment_recipe_step_details,
+                        container, false);
+
+            ButterKnife.bind(this, rootView);
 
             // Set nav panel if is not two pane mode or landscape
             if (!bundle.getBoolean(TWO_PANE) && orientation != Configuration.ORIENTATION_LANDSCAPE){
@@ -116,21 +129,25 @@ public class RecipeStepDetailsFragment extends Fragment {
                 mNextImageButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.i(TAG, "mNextImageButton");
+                        String nextStep = getNextStep();
+                        if (nextStep != null) {
+                            mCurrentStepId = nextStep;
+                            displayStep();
+                        }
                     }
                 });
 
                 mPrevImageButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.i(TAG, "mPrevImageButton");
+                        String prevStep = getPrevStep();
+                        if (prevStep != null) {
+                            mCurrentStepId = prevStep;
+                            displayStep();
+                        }
                     }
                 });
             }
-
-            mCurrentStepId = bundle.getString(SELECTED_RECIPE_STEP_ID);
-            mRecipeId = bundle.getString(SELECTED_RECIPE_ID);
-            sparseJson(bundle.getString(JSON_EXTRA));
 
             // ExoPlayer
             TrackSelector trackSelector = new DefaultTrackSelector();
@@ -148,6 +165,12 @@ public class RecipeStepDetailsFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putString(SELECTED_RECIPE_STEP_ID, mCurrentStepId);
+        super.onSaveInstanceState(outState);
+    }
+
     private void displayStep() {
 
         RecipeStep recipeStep = null;
@@ -155,7 +178,7 @@ public class RecipeStepDetailsFragment extends Fragment {
         /* Recipe id is written in the json and is not the position in the list so need to match
         id by searching. */
 
-        for (RecipeStep rs : recipeSteps) {
+        for (RecipeStep rs : mRecipeSteps) {
             if (rs.getId().equals(mCurrentStepId)) {
                 recipeStep = rs;
                 break;
@@ -197,9 +220,29 @@ public class RecipeStepDetailsFragment extends Fragment {
         }
     }
 
+    private String getNextStep() {
+
+        // Recipe steps ids are written by humans in the json so need to find instead of just
+        // increment to avoid errors.
+        for (int i = 0; i < mRecipeSteps.size(); i++)
+            if (mRecipeSteps.get(i).getId().equals(mCurrentStepId))
+                if (i < mRecipeSteps.size() - 1) return mRecipeSteps.get(i + 1).getId();
+
+        return null;
+    }
+
+    private String getPrevStep() {
+
+        for (int i = 0; i < mRecipeSteps.size(); i++)
+            if (mRecipeSteps.get(i).getId().equals(mCurrentStepId))
+                if (i > 0) return mRecipeSteps.get(i - 1).getId();
+
+        return null;
+    }
+
     private void sparseJson(String json) {
 
-        recipeSteps = new ArrayList<>();
+        mRecipeSteps = new ArrayList<>();
 
         final String ID = "id";
         final String STEPS = "steps";
@@ -249,7 +292,7 @@ public class RecipeStepDetailsFragment extends Fragment {
                                 videoUrl = step.getString(THUMBNAIL_URL);
                         }
 
-                        recipeSteps.add(new RecipeStep(
+                        mRecipeSteps.add(new RecipeStep(
                                 step.getString(ID),
                                 step.getString(DESCRIPTION),
                                 videoUrl, imageUrl
