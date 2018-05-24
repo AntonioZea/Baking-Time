@@ -52,6 +52,7 @@ import static quagem.com.uba.RecipeDetailsActivity.TWO_PANE;
 public class RecipeStepDetailsFragment extends Fragment {
 
     public static final String TAG = RecipeStepDetailsFragment.class.getSimpleName();
+    public static final String VIDEO_RESUME_POSITION = "videoResumePosition";
 
     private String mRecipeId;
     private String mCurrentStepId;
@@ -62,6 +63,8 @@ public class RecipeStepDetailsFragment extends Fragment {
     // Mime type
     private static final String VIDEO = "video";
     private static final String IMAGE = "image";
+
+    private  long mResumePosition;
 
     @BindView(R.id.recipe_step_image_view) ImageView mImageView;
     @BindView(R.id.recipe_step_video) SimpleExoPlayerView mExoPlayerView;
@@ -94,9 +97,10 @@ public class RecipeStepDetailsFragment extends Fragment {
                 bundle.containsKey(SELECTED_RECIPE_STEP_ID)) {
 
             if (savedInstanceState != null &&
-                    savedInstanceState.containsKey(SELECTED_RECIPE_STEP_ID))
+                    savedInstanceState.containsKey(SELECTED_RECIPE_STEP_ID)) {
                 mCurrentStepId = savedInstanceState.getString(SELECTED_RECIPE_STEP_ID);
-            else mCurrentStepId = bundle.getString(SELECTED_RECIPE_STEP_ID);
+                mResumePosition = savedInstanceState.getLong(VIDEO_RESUME_POSITION);
+            } else mCurrentStepId = bundle.getString(SELECTED_RECIPE_STEP_ID);
 
             mRecipeId = bundle.getString(SELECTED_RECIPE_ID);
             sparseJson(bundle.getString(JSON_EXTRA));
@@ -168,6 +172,7 @@ public class RecipeStepDetailsFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putString(SELECTED_RECIPE_STEP_ID, mCurrentStepId);
+        outState.putLong(VIDEO_RESUME_POSITION, mResumePosition);
         super.onSaveInstanceState(outState);
     }
 
@@ -211,6 +216,7 @@ public class RecipeStepDetailsFragment extends Fragment {
                         new DefaultExtractorsFactory(), null, null);
 
                 mExoPlayer.prepare(mediaSource);
+                mExoPlayer.seekTo(mResumePosition);
                 mExoPlayer.setPlayWhenReady(true);
 
                 mExoPlayerView.setVisibility(View.VISIBLE);
@@ -321,6 +327,18 @@ public class RecipeStepDetailsFragment extends Fragment {
         }
 
         return null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mExoPlayer.setPlayWhenReady(false); // pause.
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mExoPlayer.setPlayWhenReady(true); // pause.
     }
 
     @Override
