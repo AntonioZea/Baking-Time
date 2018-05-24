@@ -8,6 +8,7 @@
     android:background="@color/colorPrimary">
 
     <TextView
+        android:id="@+id/widget_recipe_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -15,7 +16,7 @@
         android:textAllCaps="true"
         android:textColor="@android:color/white"
         android:layout_margin="4dp"
-        android:text="@string/recipes"/>
+        android:text="@string/no_recipe_selected"/>
 
     <ListView
         android:id="@+id/widget_list_view"

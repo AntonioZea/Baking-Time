@@ -1,6 +1,7 @@
 package quagem.com.uba.fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,12 +24,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import quagem.com.uba.MainActivity;
 import quagem.com.uba.R;
 import quagem.com.uba.adaptors.SimpleListAdaptor;
 import quagem.com.uba.interfaces.ListItemSelectListener;
 import quagem.com.uba.model.ListItem;
 
 import static quagem.com.uba.MainActivity.JSON_EXTRA;
+import static quagem.com.uba.MainActivity.SELECTED_RECIPE_NAME;
 import static quagem.com.uba.RecipeDetailsActivity.SELECTED_RECIPE_ID;
 
 public class RecipeStepsListFragment extends Fragment {
@@ -36,6 +39,7 @@ public class RecipeStepsListFragment extends Fragment {
     public static final String TAG = RecipeListFragment.class.getSimpleName();
 
     private String mRecipeId;
+    private String mRecipeName;
     private ListItemSelectListener mCallBack;
 
     @BindView(R.id.recipe_steps_list_view) RecyclerView recyclerView;
@@ -89,6 +93,21 @@ public class RecipeStepsListFragment extends Fragment {
             recyclerView.setAdapter(recipeListAdaptor);
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+            if (getActivity() != null) getActivity().setTitle(mRecipeName);
+
+            // Save selected recipe id and name for widget.
+            if (getContext() != null){
+                SharedPreferences sharedPref = getContext().getSharedPreferences(
+                        getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(SELECTED_RECIPE_ID, mRecipeId);
+                editor.putString(SELECTED_RECIPE_NAME, mRecipeName);
+                editor.apply();
+
+                MainActivity.refreshWidget(getContext());
+            }
+
         } else Toast.makeText(getContext(), R.string.error_loading_data, Toast.LENGTH_LONG).show();
 
         return rootView;
@@ -120,7 +139,7 @@ public class RecipeStepsListFragment extends Fragment {
 
                 if (recipe.getString(ID).equals(mRecipeId)) {
 
-                    if (getActivity() != null) getActivity().setTitle(recipe.getString(NAME));
+                    mRecipeName = recipe.getString(NAME);
 
                     JSONArray steps = recipe.getJSONArray(STEPS);
 

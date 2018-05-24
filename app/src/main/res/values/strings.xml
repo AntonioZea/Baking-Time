@@ -6,7 +6,7 @@
     <string name="connection_error">No connection.</string>
     <string name="error_loading_data">Error loading data.</string>
 
-    <string name="recipes">Recipes</string>
+    <string name="no_recipe_selected">No Recipe Selected</string>
     <string name="ingredients">Ingredients</string>
 
     <!-- Context Descriptions -->

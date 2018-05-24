@@ -29,16 +29,11 @@ public class WidgetRemoteViewFactory implements RemoteViewsService.RemoteViewsFa
 
     private Context mContext;
     private String mJsonData;
+    private String mRecipeId;
     private List<ListItem> mWidgetItemList;
 
     WidgetRemoteViewFactory(Context context) {
         mContext = context;
-
-        SharedPreferences sharedPref = mContext.getSharedPreferences(
-                mContext.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-
-        mJsonData = sharedPref.getString(MainActivity.JSON_EXTRA, null);
-        if (mJsonData != null) mWidgetItemList = sparseJson(mJsonData);
     }
 
     @Override
@@ -47,9 +42,18 @@ public class WidgetRemoteViewFactory implements RemoteViewsService.RemoteViewsFa
 
     @Override
     public void onDataSetChanged() {
+
+        SharedPreferences sharedPref = mContext.getSharedPreferences(
+                mContext.getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+
+        mJsonData = sharedPref.getString(MainActivity.JSON_EXTRA, null);
+        mRecipeId = sharedPref.getString(SELECTED_RECIPE_ID, null);
+
         Log.i(TAG, "onDataSetChanged");
-
-
+        if (mJsonData != null) {
+            Log.i(TAG, "mJsonData");
+            mWidgetItemList = sparseJson(mJsonData);
+        }
     }
 
     @Override
@@ -107,12 +111,18 @@ public class WidgetRemoteViewFactory implements RemoteViewsService.RemoteViewsFa
 
     private List<ListItem> sparseJson(String json) {
 
+        final String ID = "id";
+        final String NAME = "name";
+        final String MEASURE = "measure";
+        final String QUANTITY = "quantity";
+        final String INGREDIENT = "ingredient";
+        final String INGREDIENTS = "ingredients";
+
+        StringBuilder stringBuilder = new StringBuilder();
+
         List<ListItem> listItemList;
 
         listItemList = new ArrayList<>();
-
-        final String ID = "id";
-        final String NAME = "name";
 
         try {
 
@@ -122,16 +132,39 @@ public class WidgetRemoteViewFactory implements RemoteViewsService.RemoteViewsFa
 
             for (int i = 0; i < recipes.length(); i++) {
 
-                listItemData = new ListItem();
-
                 JSONObject recipe = recipes.getJSONObject(i);
 
-                listItemData.setName(recipe.getString(NAME));
-                listItemData.setId(recipe.getString(ID));
+                if (recipe.getString(ID).equals(mRecipeId)) {
 
-                listItemList.add(listItemData);
+                    JSONArray ingredients = recipe.getJSONArray(INGREDIENTS);
+
+                    int ingredientCount = 0;
+
+                    for (int ii = 0; ii < ingredients.length(); ii++) {
+
+                        listItemData = new ListItem();
+
+                        JSONObject ingredient = ingredients.getJSONObject(ii);
+
+                        stringBuilder.append(++ingredientCount);
+                        stringBuilder.append(". ");
+                        stringBuilder.append(ingredient.getString(INGREDIENT));
+                        stringBuilder.append(" ");
+                        stringBuilder.append(ingredient.getString(QUANTITY));
+                        stringBuilder.append(" ");
+                        stringBuilder.append(ingredient.getString(MEASURE));
+                        stringBuilder.append(" ");
+
+                        listItemData.setName(stringBuilder.toString());
+                        listItemData.setId(recipe.getString(ID));
+                        listItemList.add(listItemData);
+
+                        stringBuilder.setLength(0);
+                    }
+
+                    break;
+                }
             }
-
 
         } catch (JSONException e) {
             e.printStackTrace();

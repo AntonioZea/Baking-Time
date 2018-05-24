@@ -70,7 +70,7 @@ public class RecipeDetailsActivity extends AppCompatActivity implements ListItem
                 if (mTwoPane) inflateDetailsFragment("-1");
 
             } else {
-                Toast.makeText(this, R.string.error_loading_data, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.error_loading_data + " CODE 1", Toast.LENGTH_LONG).show();
                 finish();
             }
 

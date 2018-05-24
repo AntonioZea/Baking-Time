@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements
     private final static int LOADER_ID = 101;
 
     public final static String JSON_EXTRA = "jsonExtra";
+    public final static String SELECTED_RECIPE_NAME = "selectedRecipeName";
 
     private String mJsonData = null;
 
@@ -144,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements
         editor.putString(JSON_EXTRA, mJsonData);
         editor.commit(); // no apply() I need this done now.
 
-        refreshWidget();
+        refreshWidget(this);
     }
 
     @Override
@@ -170,35 +171,24 @@ public class MainActivity extends AppCompatActivity implements
     public void OnListItemSelect(String itemId) {
         Log.i(TAG, "ListItem clicked!: " + itemId);
 
-        // Save selected recipe for widget
-        SharedPreferences sharedPref = getSharedPreferences(
-                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(SELECTED_RECIPE_ID, itemId);
-        editor.commit(); // no apply() I need this done now.
-
-        refreshWidget();
-
         Intent intent = new Intent(this, RecipeDetailsActivity.class);
 
-        intent.putExtra(MainActivity.JSON_EXTRA, mJsonData);
+        intent.putExtra(JSON_EXTRA, mJsonData);
         intent.putExtra(SELECTED_RECIPE_ID, itemId);
 
         startActivity(intent);
     }
 
-    private void refreshWidget(){
+    public static void refreshWidget(Context context){
 
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
-                new ComponentName(this, WidgetProvider.class));
+                new ComponentName(context, WidgetProvider.class));
+
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_view);
 
         for (int appWidgetId : appWidgetIds)
-            WidgetProvider.updateAppWidget(this, appWidgetManager, appWidgetId );
-
-        //appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_view);
-
+            WidgetProvider.updateAppWidget(context, appWidgetManager, appWidgetId );
     }
 
     public static class RecipeListAsyncTaskLoader extends
