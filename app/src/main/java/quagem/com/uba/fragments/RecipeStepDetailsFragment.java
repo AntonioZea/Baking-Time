@@ -342,13 +342,13 @@ public class RecipeStepDetailsFragment extends Fragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onDestroy() {
+        super.onDestroy();
+
         Log.i(TAG, "onDetach");
 
         mExoPlayer.stop();
         mExoPlayer.release();
         mExoPlayer = null;
     }
-
 }

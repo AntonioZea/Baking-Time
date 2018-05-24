@@ -37,6 +37,9 @@ import quagem.com.uba.fragments.RecipeListFragment;
 import quagem.com.uba.interfaces.ListItemSelectListener;
 import quagem.com.uba.widget.WidgetProvider;
 
+import static quagem.com.uba.RecipeDetailsActivity.SELECTED_RECIPE_ID;
+
+@SuppressLint("ApplySharedPref")
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String>, ListItemSelectListener {
 
@@ -115,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements
         return new RecipeListAsyncTaskLoader(this);
     }
 
-    @SuppressLint("ApplySharedPref")
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
         Log.i(TAG, "onLoadFinished");
@@ -142,11 +144,7 @@ public class MainActivity extends AppCompatActivity implements
         editor.putString(JSON_EXTRA, mJsonData);
         editor.commit(); // no apply() I need this done now.
 
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
-                new ComponentName(this, WidgetProvider.class));
-
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_view);
+        refreshWidget();
     }
 
     @Override
@@ -172,12 +170,35 @@ public class MainActivity extends AppCompatActivity implements
     public void OnListItemSelect(String itemId) {
         Log.i(TAG, "ListItem clicked!: " + itemId);
 
+        // Save selected recipe for widget
+        SharedPreferences sharedPref = getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(SELECTED_RECIPE_ID, itemId);
+        editor.commit(); // no apply() I need this done now.
+
+        refreshWidget();
+
         Intent intent = new Intent(this, RecipeDetailsActivity.class);
 
         intent.putExtra(MainActivity.JSON_EXTRA, mJsonData);
-        intent.putExtra(RecipeDetailsActivity.SELECTED_RECIPE_ID, itemId);
+        intent.putExtra(SELECTED_RECIPE_ID, itemId);
 
         startActivity(intent);
+    }
+
+    private void refreshWidget(){
+
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
+                new ComponentName(this, WidgetProvider.class));
+
+        for (int appWidgetId : appWidgetIds)
+            WidgetProvider.updateAppWidget(this, appWidgetManager, appWidgetId );
+
+        //appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_list_view);
+
     }
 
     public static class RecipeListAsyncTaskLoader extends
