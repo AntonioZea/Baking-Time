@@ -53,8 +53,10 @@ public class RecipeStepDetailsFragment extends Fragment {
 
     public static final String TAG = RecipeStepDetailsFragment.class.getSimpleName();
     public static final String VIDEO_RESUME_POSITION = "videoResumePosition";
+    public static final String VIDEO_STATE = "videoState";
 
     private String mRecipeId;
+    private boolean mVideoPlayWhenReady;
     private String mCurrentStepId;
     private SimpleExoPlayer mExoPlayer;
 
@@ -100,7 +102,11 @@ public class RecipeStepDetailsFragment extends Fragment {
                     savedInstanceState.containsKey(SELECTED_RECIPE_STEP_ID)) {
                 mCurrentStepId = savedInstanceState.getString(SELECTED_RECIPE_STEP_ID);
                 mResumePosition = savedInstanceState.getLong(VIDEO_RESUME_POSITION);
-            } else mCurrentStepId = bundle.getString(SELECTED_RECIPE_STEP_ID);
+                mVideoPlayWhenReady = savedInstanceState.getBoolean(VIDEO_STATE);
+            } else {
+                mVideoPlayWhenReady = true;
+                mCurrentStepId = bundle.getString(SELECTED_RECIPE_STEP_ID);
+            }
 
             mRecipeId = bundle.getString(SELECTED_RECIPE_ID);
             sparseJson(bundle.getString(JSON_EXTRA));
@@ -153,15 +159,6 @@ public class RecipeStepDetailsFragment extends Fragment {
                 });
             }
 
-            // ExoPlayer
-            TrackSelector trackSelector = new DefaultTrackSelector();
-            LoadControl loadControl = new DefaultLoadControl();
-
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(
-                    getActivity(), trackSelector, loadControl);
-
-            mExoPlayerView.setPlayer(mExoPlayer);
-
             displayStep();
 
         } else Toast.makeText(getContext(), R.string.error_loading_data, Toast.LENGTH_LONG).show();
@@ -171,12 +168,25 @@ public class RecipeStepDetailsFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
+        Log.i(TAG, "onSaveInstanceState");
         outState.putString(SELECTED_RECIPE_STEP_ID, mCurrentStepId);
+        outState.putBoolean(VIDEO_STATE, mVideoPlayWhenReady);
         outState.putLong(VIDEO_RESUME_POSITION, mResumePosition);
         super.onSaveInstanceState(outState);
     }
 
     private void displayStep() {
+
+        if (mExoPlayer == null) {
+
+            TrackSelector trackSelector = new DefaultTrackSelector();
+            LoadControl loadControl = new DefaultLoadControl();
+
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(
+                    getActivity(), trackSelector, loadControl);
+
+            mExoPlayerView.setPlayer(mExoPlayer);
+        }
 
         RecipeStep recipeStep = null;
 
@@ -217,7 +227,7 @@ public class RecipeStepDetailsFragment extends Fragment {
 
                 mExoPlayer.prepare(mediaSource);
                 mExoPlayer.seekTo(mResumePosition);
-                mExoPlayer.setPlayWhenReady(true);
+                mExoPlayer.setPlayWhenReady(mVideoPlayWhenReady);
 
                 mExoPlayerView.setVisibility(View.VISIBLE);
 
@@ -330,25 +340,36 @@ public class RecipeStepDetailsFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop");
+        releasePlayer();
+    }
+
+    @Override
     public void onPause() {
+        Log.i(TAG, "onPause");
         super.onPause();
-        mExoPlayer.setPlayWhenReady(false); // pause.
+        releasePlayer();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mExoPlayer.setPlayWhenReady(true); // pause.
+        displayStep();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    private void releasePlayer(){
 
-        Log.i(TAG, "onDetach");
+        if (mExoPlayer != null) {
 
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+            mResumePosition = mExoPlayer.getCurrentPosition();
+            mVideoPlayWhenReady = mExoPlayer.getPlayWhenReady();
+
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
     }
+
 }
